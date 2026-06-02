@@ -1,0 +1,62 @@
+{
+  "name": "cat-learning-game",
+  "version": "1.0.0",
+  "description": "猫咪学习助手 - 单词学习 + 隐藏恐怖子游戏",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "electron:dev": "vite",
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:win": "npm run build && electron-builder --win"
+  },
+  "keywords": [
+    "game",
+    "learning",
+    "horror",
+    "phaser",
+    "electron"
+  ],
+  "author": "liyi",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.90.0",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.10.0",
+    "electron": "^42.3.0",
+    "electron-builder": "^26.8.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vite-plugin-electron": "^1.0.0",
+    "vite-plugin-electron-renderer": "^1.0.0"
+  },
+  "build": {
+    "appId": "com.catlearning.game",
+    "productName": "猫咪学习助手",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/main/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/",
+        "to": "assets/"
+      }
+    ]
+  }
+}

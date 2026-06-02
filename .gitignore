@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-browser/
+dist-electron/
+release/
+*.log
+.DS_Store
+test.html
+index.html.bak
+collision-data.txt
