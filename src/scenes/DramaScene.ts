@@ -97,25 +97,28 @@ export class DramaScene extends Phaser.Scene {
     // ===== Act 0: Prologue =====
     if (actId === 0) {
       return {
-        mode: 'click',
+        mode: 'auto',
         isPrologue: true,
         slides: PROLOGUE_SCENES.map((s, i) => ({
           key: `drama-prologue-${i}`,
           title: s.title,
           text: s.text,
+          delay: 3000,
         })),
       };
     }
 
+    const AUTO_DELAY = 2000; // 每张自动播放间隔(ms)
+
     // ===== Acts 1-7 =====
     switch (actId) {
       case 1: return {
-        mode: 'click',
+        mode: 'auto',
         slides: [
-          { key: 'drama-act1-1-1', delay: 300 },
-          { key: 'drama-act1-1-2' }, { key: 'drama-act1-1-3' },
-          { key: 'drama-act1-1-4' }, { key: 'drama-act1-1-5' },
-          { key: 'drama-act1-1-6' }, { key: 'drama-act1-1-7' },
+          { key: 'drama-act1-1-1', delay: 500 },
+          { key: 'drama-act1-1-2', delay: AUTO_DELAY }, { key: 'drama-act1-1-3', delay: AUTO_DELAY },
+          { key: 'drama-act1-1-4', delay: AUTO_DELAY }, { key: 'drama-act1-1-5', delay: AUTO_DELAY },
+          { key: 'drama-act1-1-6', delay: AUTO_DELAY }, { key: 'drama-act1-1-7', delay: AUTO_DELAY },
         ],
       };
       case 2: return {
@@ -123,33 +126,33 @@ export class DramaScene extends Phaser.Scene {
         slides: [{ key: 'drama-act2-2-1-1' }],
       };
       case 3: return {
-        mode: 'click',
-        slides: Array.from({ length: 7 }, (_, i) => ({ key: `drama-act3-${i + 1}` })),
+        mode: 'auto',
+        slides: Array.from({ length: 7 }, (_, i) => ({ key: `drama-act3-${i + 1}`, delay: AUTO_DELAY })),
       };
       case 4: return {
         mode: 'choice-help',
         slides: [
-          { key: 'drama-act4-1' }, { key: 'drama-act4-2' }, { key: 'drama-act4-3' },
+          { key: 'drama-act4-1', delay: AUTO_DELAY }, { key: 'drama-act4-2', delay: AUTO_DELAY }, { key: 'drama-act4-3', delay: AUTO_DELAY },
         ],
       };
       case 5: return {
-        mode: 'click',
+        mode: 'auto',
         slides: [
-          { key: 'drama-act5-1' }, { key: 'drama-act5-2' },
-          { key: 'drama-act5-3' }, { key: 'drama-act5-4' },
+          { key: 'drama-act5-1', delay: AUTO_DELAY }, { key: 'drama-act5-2', delay: AUTO_DELAY },
+          { key: 'drama-act5-3', delay: AUTO_DELAY }, { key: 'drama-act5-4', delay: AUTO_DELAY },
         ],
       };
       case 6: return {
-        mode: 'click',
+        mode: 'auto',
         slides: [
-          { key: 'drama-act6-1' }, { key: 'drama-act6-2' }, { key: 'drama-act6-3' },
+          { key: 'drama-act6-1', delay: AUTO_DELAY }, { key: 'drama-act6-2', delay: AUTO_DELAY }, { key: 'drama-act6-3', delay: AUTO_DELAY },
         ],
       };
       case 7: return {
-        mode: 'click',
-        slides: [{ key: 'drama-act7-1' }, { key: 'drama-act7-2' }],
+        mode: 'auto',
+        slides: [{ key: 'drama-act7-1', delay: AUTO_DELAY }, { key: 'drama-act7-2', delay: AUTO_DELAY }],
       };
-      default: return { mode: 'click', slides: [] };
+      default: return { mode: 'auto', slides: [] };
     }
   }
 
@@ -162,22 +165,20 @@ export class DramaScene extends Phaser.Scene {
     this.currentIndex = index;
     const slide = this.slides[index];
 
-    // Clear previous
-    if (this.currentImage) this.currentImage.destroy();
+    // 先显示新图，再删旧图 → 避免闪烁
+    const oldImage = this.currentImage;
     if (this.textOverlay) this.textOverlay.destroy();
 
-    // Show image
     if (this.textures.exists(slide.key)) {
       this.currentImage = this.add.image(GAME_W / 2, GAME_H / 2, slide.key);
       const s = Math.min(GAME_W / this.currentImage.width, GAME_H / this.currentImage.height);
-      this.currentImage.setScale(s).setDepth(0).setAlpha(0);
+      this.currentImage.setScale(s).setDepth(1);
     } else {
-      // Fallback: dark background
       this.currentImage = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x111122, 1) as unknown as Phaser.GameObjects.Image;
-      this.currentImage.setAlpha(0);
+      this.currentImage.setDepth(1);
     }
 
-    this.tweens.add({ targets: this.currentImage, alpha: 1, duration: 500 });
+    if (oldImage) oldImage.destroy();
 
     // Show prologue text overlay
     if (slide.title || slide.text) {
@@ -288,17 +289,17 @@ export class DramaScene extends Phaser.Scene {
             { key: 'drama-act2-2-2-5', delay: 1000 }, { key: 'drama-act2-2-2-6', delay: 1000 },
             { key: 'drama-act2-2-2-7', delay: 1000 }, { key: 'drama-act2-2-2-8', delay: 3000 },
             { key: 'drama-act2-2-2-9', delay: 3000 }, { key: 'drama-act2-2-2-10', delay: 3000 },
-            { key: 'drama-act2-2-3' }, { key: 'drama-act2-2-4' },
-            { key: 'drama-act2-2-5' }, { key: 'drama-act2-2-6' },
+            { key: 'drama-act2-2-3', delay: 2000 }, { key: 'drama-act2-2-4', delay: 2000 },
+            { key: 'drama-act2-2-5', delay: 2000 }, { key: 'drama-act2-2-6', delay: 2000 },
           ];
         } else {
           useDramaStore.getState().recordChoice(2, 'other');
           this.slides = [
-            { key: 'drama-act2-2-1-2' }, { key: 'drama-act2-2-3' },
-            { key: 'drama-act2-2-4' }, { key: 'drama-act2-2-5' }, { key: 'drama-act2-2-6' },
+            { key: 'drama-act2-2-1-2', delay: 2000 }, { key: 'drama-act2-2-3', delay: 2000 },
+            { key: 'drama-act2-2-4', delay: 2000 }, { key: 'drama-act2-2-5', delay: 2000 }, { key: 'drama-act2-2-6', delay: 2000 },
           ];
         }
-        this.mode = 'click';
+        this.mode = 'auto';
         this.currentIndex = 0;
         this.showSlide(0);
       }
@@ -319,8 +320,9 @@ export class DramaScene extends Phaser.Scene {
       useDramaStore.getState().recordChoice(4, 'help');
       this.slides = [
         { key: 'drama-act4-1' }, { key: 'drama-act4-2' }, { key: 'drama-act4-3' },
-        { key: 'drama-act4-help-1' }, { key: 'drama-act4-help-2' },
+        { key: 'drama-act4-help-1', delay: 2000 }, { key: 'drama-act4-help-2', delay: 2000 },
       ];
+      this.mode = 'auto';
       this.currentIndex = 2;
       this.showSlide(3);
     });
@@ -329,10 +331,11 @@ export class DramaScene extends Phaser.Scene {
       useDramaStore.getState().recordChoice(4, 'nohelp');
       this.slides = [
         { key: 'drama-act4-1' }, { key: 'drama-act4-2' }, { key: 'drama-act4-3' },
-        { key: 'drama-act4-nohelp-1' }, { key: 'drama-act4-nohelp-2' }, { key: 'drama-act4-nohelp-3' },
-        { key: 'drama-act4-nohelp-4' }, { key: 'drama-act4-nohelp-5' }, { key: 'drama-act4-nohelp-6' },
-        { key: 'drama-act4-nohelp-7' },
+        { key: 'drama-act4-nohelp-1', delay: 2000 }, { key: 'drama-act4-nohelp-2', delay: 2000 }, { key: 'drama-act4-nohelp-3', delay: 2000 },
+        { key: 'drama-act4-nohelp-4', delay: 2000 }, { key: 'drama-act4-nohelp-5', delay: 2000 }, { key: 'drama-act4-nohelp-6', delay: 2000 },
+        { key: 'drama-act4-nohelp-7', delay: 2000 },
       ];
+      this.mode = 'auto';
       this.currentIndex = 2;
       this.showSlide(3);
     });

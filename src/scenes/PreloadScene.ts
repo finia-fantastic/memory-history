@@ -37,6 +37,8 @@ export class PreloadScene extends Phaser.Scene {
     // ========== Load room & cat assets ==========
     this.load.image('room-bg', 'assets/main/drama/prologue/房间背景.png');
     this.load.image('cat-spritesheet', 'assets/main/drama/prologue/黄毛猫行走图.png');
+    this.load.image('desktop-screen', 'assets/main/drama/prologue/桌面.png');
+    this.load.image('computer-screen', 'assets/main/drama/prologue/电脑屏幕.png');
 
     // ========== Load prologue images ==========
     const prologueFiles = ['bg1.png', 'bg2.png', 'bg3.png', 'bg4.png'];
