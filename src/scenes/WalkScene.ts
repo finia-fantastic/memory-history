@@ -12,7 +12,7 @@ export class WalkScene extends Phaser.Scene {
   private dialogOpen = false;
 
   // ---- 行走图 ----
-  private readonly DIR_ROWS: Record<string, number> = { down: 0, left: 1, right: 2, up: 3 };
+  private readonly DIR_ROWS: Record<string, number> = { down: 0, left: 2, right: 1, up: 3 };
   private playerDir = 'down';
   private frameW = 0; private frameH = 0;
   private animFrame = 1; private animTimer = 0;
@@ -43,7 +43,7 @@ export class WalkScene extends Phaser.Scene {
 
     // --- 玩家 ---
     this.player = this.physics.add.sprite(GAME_W / 2, GAME_H / 2, 'cat-frame-0-1')
-      .setDepth(10).setScale(0.25);
+      .setDepth(10).setScale(0.5);
     this.player.setCollideWorldBounds(true);
     this.player.body!.setSize(this.frameW * 0.5, this.frameH * 0.4);
     this.player.body!.setOffset(this.frameW * 0.25, this.frameH * 0.5);
@@ -269,7 +269,15 @@ export class WalkScene extends Phaser.Scene {
         if (this.textures.exists(key)) continue;
         const ct = this.textures.createCanvas(key, this.frameW, this.frameH)!;
         const ctx = ct.getContext();
-        ctx.drawImage(src, col * this.frameW, row * this.frameH, this.frameW, this.frameH, 0, 0, this.frameW, this.frameH);
+        ctx.imageSmoothingEnabled = false;
+        // 向内裁1px避免边界像素泄漏
+        const margin = 1;
+        ctx.drawImage(
+          src,
+          col * this.frameW + margin, row * this.frameH + margin,
+          this.frameW - margin * 2, this.frameH - margin * 2,
+          0, 0, this.frameW, this.frameH,
+        );
         ct.refresh();
       }
     }

@@ -4,6 +4,7 @@ import { PreloadScene } from './scenes/PreloadScene';
 import { TitleScene } from './scenes/TitleScene';
 import { GameScene } from './scenes/GameScene';
 import { WalkScene } from './scenes/WalkScene';
+import { CityLightScene } from './scenes/CityLightScene';
 import { DramaScene } from './scenes/DramaScene';
 import { SettingsScene } from './scenes/SettingsScene';
 
@@ -40,6 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
     BootScene,
     PreloadScene,
     TitleScene,
+    CityLightScene,
     WalkScene,
     GameScene,
     DramaScene,

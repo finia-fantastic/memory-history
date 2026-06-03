@@ -14,7 +14,7 @@ export class GameScene extends Phaser.Scene {
   private quizSystem!: QuizSystem;
   private voiceSystem!: VoiceSystem;
 
-  // UI Elements
+  // UI Elements (stubbed for future use)
   private bgImage!: Phaser.GameObjects.Image;
   private wordDisplay!: Phaser.GameObjects.Text;
   private resultText!: Phaser.GameObjects.Text;
@@ -23,8 +23,6 @@ export class GameScene extends Phaser.Scene {
   private voiceStatus!: Phaser.GameObjects.Text;
   private petSprite!: Phaser.GameObjects.Image;
   private aiBubble!: Phaser.GameObjects.Container;
-
-  // HTML input overlay for answer entry
   private answerInput!: HTMLInputElement;
   private answerInputElement!: Phaser.GameObjects.DOMElement;
 
@@ -47,9 +45,30 @@ export class GameScene extends Phaser.Scene {
     // --- Build UI ---
     this.createBackground();
     this.createHotspots();
-    this.createDisplayElements();
-    this.createAnswerInput();
-    this.createPet();
+
+    // Stub UI elements (invisible, for existing code compatibility)
+    this.wordDisplay = this.add.text(-100, -100, '', { fontSize: '1px' });
+    this.resultText = this.add.text(-100, -100, '', { fontSize: '1px' });
+    this.modeText = this.add.text(-100, -100, '', { fontSize: '1px' });
+    this.statsText = this.add.text(-100, -100, '', { fontSize: '1px' });
+    this.voiceStatus = this.add.text(-100, -100, '', { fontSize: '1px' });
+    this.aiBubble = this.add.container(-100, -100);
+
+    // --- AE 动画大头像 ---
+    this.createAvatar();
+
+    // --- 返回房间按钮 ---
+    const backBtn = this.add.text(20, 20, '← 返回房间', {
+      fontFamily: '"Microsoft YaHei", Arial, sans-serif',
+      fontSize: '14px', color: '#ffffff',
+      backgroundColor: 'rgba(0,0,0,0.5)', padding: { x: 10, y: 6 },
+    }).setDepth(200).setInteractive({ useHandCursor: true });
+    backBtn.on('pointerdown', () => {
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        this.scene.start('WalkScene');
+      });
+    });
 
     // --- Initialize Systems ---
     this.quizSystem = new QuizSystem(this);
@@ -77,7 +96,9 @@ export class GameScene extends Phaser.Scene {
   // ==================== UI Creation ====================
 
   private createBackground(): void {
-    if (this.textures.exists('ui-bg')) {
+    if (this.textures.exists('ui-main')) {
+      this.bgImage = this.add.image(0, 0, 'ui-main').setOrigin(0).setDisplaySize(GAME_W, GAME_H).setDepth(0);
+    } else if (this.textures.exists('ui-bg')) {
       this.bgImage = this.add.image(0, 0, 'ui-bg').setOrigin(0).setDisplaySize(GAME_W, GAME_H);
     } else {
       this.cameras.main.setBackgroundColor(COLORS.bgBeige);
@@ -184,6 +205,53 @@ export class GameScene extends Phaser.Scene {
     this.answerInputElement = this.add.dom(GAME_W / 2, 450, this.answerInput);
   }
 
+  private avatarFrame = 0;
+  private avatarSprite!: Phaser.GameObjects.Image;
+  private avatarTimer = 0;
+
+  private createAvatar(): void {
+    if (this.textures.exists('avatar-0')) {
+      this.avatarSprite = this.add.image(0, 0, 'avatar-0').setDepth(5);
+      const frameH = 770;
+      const sy = GAME_H / frameH;
+      const sx = sy * 1.3;
+      this.avatarSprite.setScale(sx, sy);
+      this.avatarSprite.setPosition(1011, 391);
+
+      // DEV: F3 拖拽调整位置
+      let devDrag = false;
+      this.input.keyboard!.addKey('F3').on('down', () => {
+        devDrag = !devDrag;
+        this.avatarSprite.setInteractive({ draggable: devDrag, useHandCursor: devDrag });
+        if (devDrag) {
+          this.avatarSprite.setTint(0x88ff88);
+        } else {
+          this.avatarSprite.clearTint();
+          console.log(`avatar position: x=${Math.round(this.avatarSprite.x)}, y=${Math.round(this.avatarSprite.y)}`);
+        }
+      });
+      this.input.on('drag', (_p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject, dragX: number, dragY: number) => {
+        if (obj === this.avatarSprite) {
+          this.avatarSprite.x = dragX;
+          this.avatarSprite.y = dragY;
+        }
+      });
+    }
+  }
+
+  private updateAvatar(delta: number): void {
+    if (!this.avatarSprite) return;
+    this.avatarTimer += delta;
+    if (this.avatarTimer >= 80) { // 80ms ≈ 12.5fps
+      this.avatarTimer = 0;
+      this.avatarFrame = (this.avatarFrame + 1) % 125;
+      const key = `avatar-${this.avatarFrame}`;
+      if (this.textures.exists(key)) {
+        this.avatarSprite.setTexture(key);
+      }
+    }
+  }
+
   private createPet(): void {
     // Pet in bottom-right corner
     if (this.textures.exists('pet')) {
@@ -216,15 +284,97 @@ export class GameScene extends Phaser.Scene {
 
   // ==================== Hotspot Actions ====================
 
-  private openWordbook(): void {
-    // Will be implemented as a popup overlay
-    console.log('Open wordbook');
-    this.showOverlay('单词本 - 开发中');
+  private async openWordbook(): Promise<void> {
+    const words = await window.electronAPI?.db.getWords() ?? [];
+    const parts: Phaser.GameObjects.GameObject[] = [];
+    const mask = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x000000, 0.6)
+      .setDepth(150).setInteractive(); parts.push(mask);
+    const closeAll = () => parts.forEach(p => p.destroy());
+
+    const bg = this.add.graphics().setDepth(151);
+    bg.fillStyle(0xffffff, 0.95);
+    bg.fillRoundedRect(100, 50, GAME_W - 200, GAME_H - 100, 12);
+    parts.push(bg);
+
+    this.add.text(GAME_W / 2, 70, '📖 单词本', {
+      fontFamily: '"Microsoft YaHei", Arial', fontSize: '22px', color: '#333',
+    }).setOrigin(0.5).setDepth(152);
+
+    const closeBtn = this.add.text(GAME_W - 130, 60, '✕', {
+      fontSize: '20px', color: '#999',
+    }).setInteractive({ useHandCursor: true }).setDepth(152);
+    closeBtn.on('pointerdown', closeAll);
+    parts.push(closeBtn);
+
+    if (words.length === 0) {
+      this.add.text(GAME_W / 2, GAME_H / 2, '暂无单词，请先添加', {
+        fontSize: '18px', color: '#999',
+      }).setOrigin(0.5).setDepth(152);
+    } else {
+      // Word list in scrollable area
+      let y = 100;
+      words.slice(0, 30).forEach(w => {
+        const statusEmoji = w.status === 'mastered' ? '⭐' : w.status === 'reviewing' ? '📝' : '🆕';
+        this.add.text(140, y, `${w.english}  —  ${w.chinese}  ${statusEmoji}`, {
+          fontFamily: 'Arial', fontSize: '15px', color: '#333',
+        }).setDepth(152);
+        y += 22;
+      });
+    }
+
+    mask.on('pointerdown', closeAll);
   }
 
   private openWordManager(): void {
-    console.log('Open word manager');
-    this.showOverlay('单词管理 - 开发中');
+    const parts: Phaser.GameObjects.GameObject[] = [];
+    const mask = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x000000, 0.6)
+      .setDepth(150).setInteractive(); parts.push(mask);
+    const closeAll = () => parts.forEach(p => p.destroy());
+
+    const bg = this.add.graphics().setDepth(151);
+    bg.fillStyle(0xffffff, 0.95);
+    bg.fillRoundedRect(200, 150, GAME_W - 400, 350, 12);
+    parts.push(bg);
+
+    this.add.text(GAME_W / 2, 180, '➕ 添加单词', {
+      fontFamily: '"Microsoft YaHei", Arial', fontSize: '20px', color: '#333',
+    }).setOrigin(0.5).setDepth(152);
+
+    // English input
+    const enInput = document.createElement('input');
+    enInput.placeholder = '英文';
+    enInput.style.cssText = 'width:200px;font-size:16px;padding:6px;margin:4px;';
+    const cnInput = document.createElement('input');
+    cnInput.placeholder = '中文';
+    cnInput.style.cssText = 'width:200px;font-size:16px;padding:6px;margin:4px;';
+
+    const enDom = this.add.dom(GAME_W / 2 - 110, 230, enInput).setDepth(153);
+    const cnDom = this.add.dom(GAME_W / 2 + 110, 230, cnInput).setDepth(153);
+
+    // Add button
+    const addBg = this.add.graphics().setDepth(153);
+    addBg.fillStyle(0x4a90d9, 1);
+    addBg.fillRoundedRect(GAME_W / 2 - 50, 280, 100, 34, 6);
+    parts.push(addBg);
+    const addText = this.add.text(GAME_W / 2, 297, '添加', {
+      fontSize: '16px', color: '#fff',
+    }).setOrigin(0.5).setDepth(154);
+
+    this.add.zone(GAME_W / 2, 297, 100, 34).setInteractive({ useHandCursor: true }).setDepth(155)
+      .on('pointerdown', async () => {
+        const en = enInput.value.trim();
+        const cn = cnInput.value.trim();
+        if (en && cn) {
+          const result = await window.electronAPI?.db.addWord(en, cn);
+          if (result) {
+            enInput.value = ''; cnInput.value = '';
+            this.showToast(result.message);
+            this.loadStats();
+          }
+        }
+      });
+
+    mask.on('pointerdown', closeAll);
   }
 
   private cycleMode(): void {
@@ -244,6 +394,16 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     useQuizStore.getState().startQuiz(words, mode);
+    // 创建答案输入框
+    if (!this.answerInput) {
+      this.answerInput = document.createElement('input');
+      this.answerInput.type = 'text';
+      this.answerInput.placeholder = '输入答案...';
+      this.answerInput.style.cssText = 'font-size:20px;padding:8px 16px;border:2px solid #4a90d9;border-radius:8px;background:rgba(255,255,255,0.9);width:260px;text-align:center;outline:none';
+      this.answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.checkAnswer(); });
+      this.answerInputElement = this.add.dom(GAME_W / 2, GAME_H - 60, this.answerInput).setDepth(20);
+    }
+    this.answerInput.style.display = 'block';
     this.showNextQuizWord();
   }
 
@@ -314,6 +474,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showQuizResults(): void {
+    if (this.answerInput) this.answerInput.style.display = 'none';
     const state = useQuizStore.getState();
     const accuracy = state.totalCount > 0
       ? Math.round((state.correctCount / state.totalCount) * 100)
@@ -484,6 +645,14 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  private showToast(msg: string): void {
+    const t = this.add.text(GAME_W / 2, 50, msg, {
+      fontFamily: '"Microsoft YaHei", Arial', fontSize: '14px', color: '#fff',
+      backgroundColor: 'rgba(0,0,0,0.8)', padding: { x: 14, y: 8 },
+    }).setOrigin(0.5).setDepth(300);
+    this.tweens.add({ targets: t, alpha: 0, y: 30, delay: 2000, duration: 600, onComplete: () => t.destroy() });
+  }
+
   private showOverlay(msg: string): void {
     const overlay = this.add.rectangle(GAME_W / 2, GAME_H / 2, 600, 400, 0x000000, 0.85).setDepth(200);
     const text = this.add.text(GAME_W / 2, GAME_H / 2, msg, {
@@ -499,8 +668,11 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  update(_time: number, delta: number): void {
+    this.updateAvatar(delta);
+  }
+
   private refreshUI(): void {
     // Update all UI elements based on new size
-    // Will be fully implemented when assets are in place
   }
 }

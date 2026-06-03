@@ -36,7 +36,10 @@ export class PreloadScene extends Phaser.Scene {
 
     // ========== Load room & cat assets ==========
     this.load.image('room-bg', 'assets/main/drama/prologue/房间背景.png');
-    this.load.image('cat-spritesheet', 'assets/main/drama/prologue/黄毛猫行走图.png');
+    this.load.image('city-lights', 'assets/main/drama/prologue/城市灯光.png');
+    this.load.image('dayun', 'assets/main/drama/prologue/大运.jpg');
+    this.load.image('ui-main', 'assets/main/ui/ui.png');
+    this.load.image('cat-spritesheet', 'assets/main/drama/prologue/白毛行走图.png');
     this.load.image('desktop-screen', 'assets/main/drama/prologue/桌面.png');
     this.load.image('computer-screen', 'assets/main/drama/prologue/电脑屏幕.png');
 
@@ -102,7 +105,12 @@ export class PreloadScene extends Phaser.Scene {
       this.load.image(`drama-act7-${i}`, `${base}/act7/${i}.png`);
     }
 
-    // Main UI background (placeholder if not available)
+    // AE 动画帧
+    for (let i = 0; i < 125; i++) {
+      const num = String(i).padStart(5, '0');
+      this.load.image(`avatar-${i}`, `assets/main/avatar/frames/组 1_${num}.png`);
+    }
+
     this.load.on('complete', () => {
       this.progressText.setText('加载完成！');
     });

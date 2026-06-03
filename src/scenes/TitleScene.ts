@@ -45,7 +45,7 @@ export class TitleScene extends Phaser.Scene {
       // Enter the room — player controls the cat
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('WalkScene');
+        this.scene.start('CityLightScene');
       });
     });
 

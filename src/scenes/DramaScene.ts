@@ -87,10 +87,13 @@ export class DramaScene extends Phaser.Scene {
     }
 
     this.input.on('pointerdown', () => {
-      if (this.mode === 'click' || config.isPrologue) {
+      if (this.mode === 'click' || this.mode === 'choice-help' || config.isPrologue) {
         this.nextSlide();
       }
     });
+
+    // DEV: F9 跳过全部剧情
+    this.input.keyboard!.addKey('F9').on('down', () => { this.skipAllDrama(); });
   }
 
   private getActConfig(actId: number): ActConfig {
@@ -352,6 +355,14 @@ export class DramaScene extends Phaser.Scene {
   }
 
   // ============ End ============
+
+  // DEV: 跳过全部剧情
+  private skipAllDrama(): void {
+    useDramaStore.getState().setIsPlaying(false);
+    useDramaStore.getState().setCurrentAct(0);
+    this.cameras.main.fadeOut(400, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => { this.scene.start('GameScene'); });
+  }
 
   private endAct(): void {
     if (this.actId === 0) {
