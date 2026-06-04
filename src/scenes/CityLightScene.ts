@@ -40,6 +40,10 @@ const INTRO_SLIDES = [
       ],
     ],
   },
+  {
+    key: '__video__', name: '视频',
+    steps: [[]], // 视频自动播放，无需字幕
+  },
 ];
 
 export class CityLightScene extends Phaser.Scene {
@@ -126,8 +130,14 @@ export class CityLightScene extends Phaser.Scene {
   private showCurrentStep(): void {
     const slide = INTRO_SLIDES[this.slideIndex];
     if (!slide) { this.goToRoom(); return; }
+
+    // 视频播放
+    if (slide.key === '__video__') {
+      this.playVideo();
+      return;
+    }
+
     if (this.stepIndex >= slide.steps.length) {
-      // 当前图片的步播完了，切下一张
       this.nextSlide();
       return;
     }
@@ -222,6 +232,42 @@ export class CityLightScene extends Phaser.Scene {
     text.on('pointerdown', (p: Phaser.Input.Pointer) => { if (p.rightButtonDown()) text.destroy(); });
 
     console.log(`[${INTRO_SLIDES[this.slideIndex]?.name} Step${this.stepIndex}] "${content}" at (${Math.round(x)}, ${Math.round(y)})`);
+  }
+
+  // ============ 视频播放 ============
+
+  private playVideo(): void {
+    // 隐藏字幕和UI
+    this.subtitleObjects.forEach(t => t.destroy());
+    this.subtitleObjects = [];
+
+    const video = document.createElement('video');
+    video.src = 'assets/main/drama/prologue/作为鬼魂到了异世界.mp4';
+    video.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;background:#000;';
+    video.autoplay = true;
+    video.muted = false;
+
+    // 将视频添加到游戏容器
+    const container = document.getElementById('game-container');
+    if (container) container.appendChild(video);
+
+    // 视频结束 → 进入房间
+    video.onended = () => {
+      video.remove();
+      this.goToRoom();
+    };
+
+    // 点击跳过视频
+    video.onclick = () => {
+      video.remove();
+      this.goToRoom();
+    };
+
+    // F9 跳过
+    this.input.keyboard!.addKey('F9').on('down', () => {
+      video.remove();
+      this.goToRoom();
+    });
   }
 
   // ============ 通用 ============

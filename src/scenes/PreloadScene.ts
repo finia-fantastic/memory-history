@@ -38,6 +38,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('room-bg', 'assets/main/drama/prologue/房间背景.png');
     this.load.image('city-lights', 'assets/main/drama/prologue/城市灯光.png');
     this.load.image('dayun', 'assets/main/drama/prologue/大运.jpg');
+    // 视频单独加载（不通过 Phaser loader）
     this.load.image('ui-main', 'assets/main/ui/ui.png');
     this.load.image('cat-spritesheet', 'assets/main/drama/prologue/白毛行走图.png');
     this.load.image('desktop-screen', 'assets/main/drama/prologue/桌面.png');
