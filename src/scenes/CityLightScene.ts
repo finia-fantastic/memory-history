@@ -1,50 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_W, GAME_H } from '../utils/Constants';
+import { CHAPTER1_SLIDES } from '../story/chapter1';
 
-// 开场图片序列配置
-// steps: 每张图可以有多步字幕 [ { text, x, y }[] ]
-const INTRO_SLIDES = [
-  {
-    key: 'city-lights', name: '城市灯光',
-    steps: [
-      [
-        { text: '"啊，已经八点半了，我给回家了，不然妈妈要骂我了"', x: 640, y: 350 },
-      ],
-      [
-        { text: '"拜拜，大家也要注意路上安全哦"', x: 640, y: 350 },
-      ],
-    ],
-  },
-  {
-    key: '', name: '黑屏', // 无图片=纯黑背景
-    steps: [
-      [
-        { text: '正当我在十字路口和大家告别的时候', x: 640, y: 360 },
-      ],
-    ],
-  },
-  {
-    key: 'dayun', name: '大运',
-    steps: [
-      [
-        { text: '一量大货车向我撞来', x: 640, y: 360 },
-      ],
-      [
-        { text: '我的报应到了啊，这是我的第一反应', x: 640, y: 360 },
-      ],
-      [
-        { text: '校园霸凌班里不爱说话的女孩，偷窃店家的东西被发现了就嫁祸给无辜的路人，抢走闺蜜的男朋友...', x: 640, y: 360 },
-      ],
-      [
-        { text: '无所谓了，这一切都结束了', x: 640, y: 360 },
-      ],
-    ],
-  },
-  {
-    key: '__video__', name: '视频',
-    steps: [[]], // 视频自动播放，无需字幕
-  },
-];
+const INTRO_SLIDES = CHAPTER1_SLIDES;
 
 export class CityLightScene extends Phaser.Scene {
   private slideIndex = 0;
@@ -131,9 +89,11 @@ export class CityLightScene extends Phaser.Scene {
     const slide = INTRO_SLIDES[this.slideIndex];
     if (!slide) { this.goToRoom(); return; }
 
-    // 视频播放
-    if (slide.key === '__video__') {
-      this.playVideo();
+    // 灵魂场景
+    if (slide.key === '__soul__') {
+      console.log('>>> 启动灵魂场景 <<<');
+      this.cameras.main.fadeOut(800, 0, 0, 0);
+      this.time.delayedCall(800, () => { this.scene.start('SoulScene'); });
       return;
     }
 

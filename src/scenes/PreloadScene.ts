@@ -44,12 +44,6 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('desktop-screen', 'assets/main/drama/prologue/桌面.png');
     this.load.image('computer-screen', 'assets/main/drama/prologue/电脑屏幕.png');
 
-    // ========== Load prologue images ==========
-    const prologueFiles = ['bg1.png', 'bg2.png', 'bg3.png', 'bg4.png'];
-    prologueFiles.forEach((f, i) => {
-      this.load.image(`drama-prologue-${i}`, `assets/main/drama/prologue/${f}`);
-    });
-
     // ========== Load all drama images ==========
     const base = 'assets/main/drama';
 
