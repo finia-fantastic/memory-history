@@ -252,28 +252,15 @@ export class CityLightScene extends Phaser.Scene {
     if (container) container.appendChild(video);
 
     // 视频结束 → 进入房间
-    video.onended = () => {
-      video.remove();
-      this.goToRoom();
-    };
-
-    // 点击跳过视频
-    video.onclick = () => {
-      video.remove();
-      this.goToRoom();
-    };
-
-    // F9 跳过
-    this.input.keyboard!.addKey('F9').on('down', () => {
-      video.remove();
-      this.goToRoom();
-    });
+    video.onended = () => { video.remove(); this.goToRoom(); };
+    video.onclick = () => { video.remove(); this.goToRoom(); };
+    this.input.keyboard!.addKey('F9').on('down', () => { video.remove(); this.goToRoom(); });
   }
 
   // ============ 通用 ============
 
   private goToRoom(): void {
     this.cameras.main.fadeOut(800, 0, 0, 0);
-    this.cameras.main.once('camerafadeoutcomplete', () => { this.scene.start('WalkScene'); });
+    this.cameras.main.once('camerafadeoutcomplete', () => { this.scene.start('ChurchMapScene'); });
   }
 }
