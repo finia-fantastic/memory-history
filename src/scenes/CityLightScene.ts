@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_W, GAME_H } from '../utils/Constants';
 import { CHAPTER1_SLIDES } from '../story/chapter1';
+import { BGMManager } from '../systems/main/BGMManager';
 
 const INTRO_SLIDES = CHAPTER1_SLIDES;
 
@@ -20,6 +21,15 @@ export class CityLightScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor('#000000');
     this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+    // 首帧点击后播放BGM（浏览器要求用户交互才能播放音频）
+    const startBGM = () => {
+      if (!this.sound.get('bgm-cat')?.isPlaying) {
+        new BGMManager(this).play('bgm-cat', 0.4);
+      }
+    };
+    this.input.once('pointerdown', startBGM);
+    this.input.keyboard?.once('keydown', startBGM);
 
     this.alignLine = this.add.graphics().setDepth(65).setVisible(false);
 

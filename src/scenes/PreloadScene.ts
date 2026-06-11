@@ -34,6 +34,9 @@ export class PreloadScene extends Phaser.Scene {
       this.progressBar.fillRoundedRect(barX, barY, barW * value, barH, 4);
     });
 
+    // ========== Load BGM ==========
+    this.load.audio('bgm-cat', 'assets/main/bgm/枕边的黑猫.mp3');
+
     // ========== Load room & cat assets ==========
     this.load.image('room-bg', 'assets/main/drama/prologue/房间背景.png');
     this.load.image('city-lights', 'assets/main/drama/prologue/城市灯光.png');
